@@ -1,0 +1,16 @@
+{
+  "name": "agentops-webhook",
+  "version": "1.0.0",
+  "description": "Webhook receiver for Copilot Studio events with Azure Container Apps deployment",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

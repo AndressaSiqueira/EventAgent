@@ -1,0 +1,84 @@
+trigger: none
+pr: none
+
+parameters:
+- name: agentPayload
+  type: string
+  default: '{}'
+
+variables:
+- name: vmImage
+  value: ubuntu-latest
+- name: imageRepository
+  value: agentops-webhook
+- name: dockerfilePath
+  value: Dockerfile
+- name: buildContext
+  value: .
+# Configure these in Azure DevOps Library/Variables or pipeline variables.
+- name: containerRegistryServiceConnection
+  value: $(containerRegistryServiceConnection)
+- name: azureSubscriptionServiceConnection
+  value: $(azureSubscriptionServiceConnection)
+- name: acrLoginServer
+  value: $(acrLoginServer)
+- name: resourceGroup
+  value: $(resourceGroup)
+- name: containerAppName
+  value: $(containerAppName)
+
+stages:
+- stage: Build
+  displayName: Build and Push Image
+  jobs:
+  - job: BuildAndPush
+    pool:
+      vmImage: $(vmImage)
+    steps:
+    - task: Docker@2
+      displayName: Build and push image
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(containerRegistryServiceConnection)
+        buildContext: $(buildContext)
+        tags: |
+          $(Build.BuildId)
+          latest
+
+- stage: Deploy
+  displayName: Deploy to Azure Container Apps
+  dependsOn: Build
+  jobs:
+  - deployment: DeployContainerApp
+    environment: production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            displayName: Update container app revision
+            inputs:
+              azureSubscription: $(azureSubscriptionServiceConnection)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+
+                az extension add --name containerapp --upgrade --only-show-errors
+
+                IMAGE="$(acrLoginServer)/$(imageRepository):$(Build.BuildId)"
+                PAYLOAD_B64="$(printf '%s' '${{ parameters.agentPayload }}' | base64 -w 0)"
+                EVENT_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+                az containerapp update \
+                  --name "$(containerAppName)" \
+                  --resource-group "$(resourceGroup)" \
+                  --image "$IMAGE" \
+                  --set-env-vars COPILOT_AGENT_PAYLOAD_B64="$PAYLOAD_B64" COPILOT_EVENT_TIMESTAMP="$EVENT_TIME" BUILD_BUILDID="$(Build.BuildId)"
+
+                az containerapp revision list \
+                  --name "$(containerAppName)" \
+                  --resource-group "$(resourceGroup)" \
+                  --query "[0].name" -o tsv
