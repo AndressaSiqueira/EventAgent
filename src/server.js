@@ -23,6 +23,101 @@ function decodePayload(payloadB64) {
   }
 }
 
+/**
+ * Convert structured executive_brief payload into markdown.
+ */
+function convertExecutiveBriefToMarkdown(payload) {
+  if (!payload || !payload.executive_brief) return null;
+
+  const brief = payload.executive_brief;
+  const eventName = payload.event_name || "Event Report";
+  let md = "";
+
+  // Top 5 Stories
+  if (brief.top_5_stories && brief.top_5_stories.length > 0) {
+    md += "## Top Stories\n\n";
+    brief.top_5_stories.forEach((story, i) => {
+      md += `### ${i + 1}. ${story.title}\n\n`;
+      md += `**Why it matters:** ${story.why_it_matters}\n\n`;
+      md += `**Implication:** ${story.implication}\n\n`;
+    });
+  }
+
+  // Stories by Solution Area
+  if (brief.stories_by_solution_area && brief.stories_by_solution_area.length > 0) {
+    md += "## Stories by Solution Area\n\n";
+    md += "| Solution Area | Key Message | Signals |\n";
+    md += "|---|---|---|\n";
+    brief.stories_by_solution_area.forEach((area) => {
+      const msg = area.key_message.replace(/\|/g, "\\|").substring(0, 200) + (area.key_message.length > 200 ? "..." : "");
+      md += `| **${area.solution_area}** | ${msg} | ${area.notable_signals || ""} |\n`;
+    });
+    md += "\n";
+  }
+
+  // Actions
+  if (brief.actions) {
+    md += "## Recommended Actions\n\n";
+    if (brief.actions.SIs && brief.actions.SIs.length > 0) {
+      md += "### For System Integrators (SIs)\n\n";
+      brief.actions.SIs.forEach((action) => {
+        md += `- ${action}\n`;
+      });
+      md += "\n";
+    }
+    if (brief.actions.SDC_ISVs && brief.actions.SDC_ISVs.length > 0) {
+      md += "### For ISVs & SDC Partners\n\n";
+      brief.actions.SDC_ISVs.forEach((action) => {
+        md += `- ${action}\n`;
+      });
+      md += "\n";
+    }
+  }
+
+  // Priority Notes
+  if (brief.priority_notes && brief.priority_notes.length > 0) {
+    md += "## Priority Notes\n\n";
+    brief.priority_notes.forEach((note) => {
+      md += `> ${note}\n\n`;
+    });
+  }
+
+  // Normalized Signals Summary
+  if (payload.normalized_signals && payload.normalized_signals.items) {
+    md += "## Signal Details\n\n";
+    payload.normalized_signals.items.forEach((signal) => {
+      md += `**${signal.id}: ${signal.title}** (${signal.product_area})\n`;
+      md += `${signal.summary}\n`;
+      md += `_Source: ${signal.source} — ${signal.source_ref}_\n\n`;
+    });
+  }
+
+  return md || null;
+}
+
+/**
+ * Extract report data from payload (supports both formats).
+ */
+function extractReportData(payload) {
+  if (!payload) return { title: null, bodyMd: null };
+
+  // New format: executive_brief structure
+  if (payload.executive_brief) {
+    return {
+      title: payload.event_name || "Executive Report",
+      bodyMd: convertExecutiveBriefToMarkdown(payload),
+      timestamp: payload.timestampUtc || null,
+    };
+  }
+
+  // Old format: reportBody markdown
+  return {
+    title: payload.reportTitle || null,
+    bodyMd: payload.reportBody || null,
+    timestamp: payload.timestampUtc || null,
+  };
+}
+
 let lastEvent = {
   receivedAtUtc: null,
   payload: decodePayload(process.env.COPILOT_AGENT_PAYLOAD_B64)
@@ -34,11 +129,11 @@ app.get("/health", (_req, res) => {
 
 app.get("/report", (_req, res) => {
   const payload = lastEvent.payload || {};
-  const bodyMd = payload.reportBody || null;
+  const { title, bodyMd, timestamp } = extractReportData(payload);
   const html = renderReport({
-    title: payload.reportTitle || "Relatório Executivo",
+    title: title || "Executive Report",
     body: bodyMd ? marked.parse(bodyMd) : null,
-    timestamp: payload.timestampUtc || null,
+    timestamp: timestamp || null,
     buildId: process.env.BUILD_BUILDID || null,
   });
   res.status(200).type("html").send(html);
