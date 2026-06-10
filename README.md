@@ -16,6 +16,7 @@ Para este caso de uso (eventos/webhook + deploy frequente), Azure Container Apps
 - `src/server.js`: receptor HTTP para eventos do Copilot Studio.
 - `Dockerfile`: imagem da aplicacao Node.js.
 - `azure-pipelines.yml`: build, push e deploy para Container Apps.
+- `docs/copilot-studio-agent-setup.md`: configuracao do agente, action HTTP e body enviado ao Azure DevOps.
 
 ## Pre-requisitos
 

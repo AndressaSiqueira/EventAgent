@@ -9,23 +9,25 @@ parameters:
 variables:
 - name: vmImage
   value: ubuntu-latest
+- name: queueAgentPayload
+  value: ''
 - name: imageRepository
   value: agentops-webhook
 - name: dockerfilePath
   value: Dockerfile
 - name: buildContext
   value: .
-# Configure these in Azure DevOps Library/Variables or pipeline variables.
+# Update these names to match existing service connections in Azure DevOps.
 - name: containerRegistryServiceConnection
-  value: $(containerRegistryServiceConnection)
+  value: AgentOps-ACR-SC
 - name: azureSubscriptionServiceConnection
-  value: $(azureSubscriptionServiceConnection)
+  value: AgentOps-AzureRM-SC
 - name: acrLoginServer
-  value: $(acrLoginServer)
+  value: youracr.azurecr.io
 - name: resourceGroup
-  value: $(resourceGroup)
+  value: rg-agentops
 - name: containerAppName
-  value: $(containerAppName)
+  value: ca-agentops-webhook
 
 stages:
 - stage: Build
@@ -69,7 +71,12 @@ stages:
                 az extension add --name containerapp --upgrade --only-show-errors
 
                 IMAGE="$(acrLoginServer)/$(imageRepository):$(Build.BuildId)"
-                PAYLOAD_B64="$(printf '%s' '${{ parameters.agentPayload }}' | base64 -w 0)"
+                PAYLOAD_INPUT='${{ parameters.agentPayload }}'
+                if [ -n "${QUEUE_AGENT_PAYLOAD:-}" ]; then
+                  PAYLOAD_INPUT="$QUEUE_AGENT_PAYLOAD"
+                fi
+
+                PAYLOAD_B64="$(printf '%s' "$PAYLOAD_INPUT" | base64 -w 0)"
                 EVENT_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
                 az containerapp update \
@@ -82,3 +89,5 @@ stages:
                   --name "$(containerAppName)" \
                   --resource-group "$(resourceGroup)" \
                   --query "[0].name" -o tsv
+            env:
+              QUEUE_AGENT_PAYLOAD: $(queueAgentPayload)
