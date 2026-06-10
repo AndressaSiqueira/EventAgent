@@ -86,25 +86,13 @@ stages:
 
                 # Copilot Studio Queue a new build sends values in Build.Parameters.
                 if [ -n "${BUILD_PARAMETERS_RAW:-}" ]; then
-                  PARAM_AGENT_PAYLOAD="$(python3 - <<'PY'
-import json
-import os
-
-raw = os.environ.get("BUILD_PARAMETERS_RAW", "").strip()
-if not raw:
-    print("")
-else:
-    try:
-        data = json.loads(raw)
-        value = data.get("agentPayload", "")
-        if isinstance(value, str):
-            print(value)
-        else:
-            print(json.dumps(value))
-    except Exception:
-        print("")
-PY
-)"
+                  PARAM_AGENT_PAYLOAD="$(python3 -c 'import json,os; raw=os.environ.get("BUILD_PARAMETERS_RAW", "").strip();
+        try:
+          data=json.loads(raw) if raw else {}
+          v=data.get("agentPayload", "")
+          print(v if isinstance(v,str) else json.dumps(v))
+        except Exception:
+          print("")')"
 
                   if [ -n "${PARAM_AGENT_PAYLOAD:-}" ]; then
                     PAYLOAD_INPUT="$PARAM_AGENT_PAYLOAD"
