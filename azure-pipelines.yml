@@ -19,7 +19,7 @@ variables:
   value: .
 # Update these names to match existing service connections in Azure DevOps.
 - name: containerRegistryServiceConnection
-  value: AgentOps-ACR-SC
+  value: AgentOps-ACR-SCC
 - name: azureSubscriptionServiceConnection
   value: AgentOps-AzureRM-SC
 - name: acrLoginServer
