@@ -14,22 +14,36 @@ variables:
 - name: agentPayload
   value: ''
 - name: imageRepository
-  value: agentops-webhook
+  value: eventagent-webhook
 - name: dockerfilePath
   value: Dockerfile
 - name: buildContext
   value: .
-# Update these names to match existing service connections in Azure DevOps.
+
+# ============================================================
+# CONFIGURE THESE VALUES FOR YOUR ENVIRONMENT
+# ============================================================
+# Service connection for Azure Container Registry (Docker Registry type)
 - name: containerRegistryServiceConnection
-  value: AgentOps-ACR-SCC
+  value: YOUR-ACR-SERVICE-CONNECTION    # e.g., EventAgent-ACR-SC
+
+# Service connection for Azure Resource Manager
 - name: azureSubscriptionServiceConnection
-  value: AgentOps-AzureRM-SC
+  value: YOUR-AZURE-RM-SERVICE-CONNECTION  # e.g., EventAgent-AzureRM-SC
+
+# Your ACR login server (from: az acr show --name YOUR_ACR --query loginServer)
 - name: acrLoginServer
-  value: crcommunitydashansi.azurecr.io
+  value: YOUR_ACR_NAME.azurecr.io       # e.g., acreventagent.azurecr.io
+
+# Your resource group name
 - name: resourceGroup
-  value: rg-community-dashboard
+  value: YOUR-RESOURCE-GROUP            # e.g., rg-eventagent
+
+# Your container app name
 - name: containerAppName
-  value: ca-community-dashboard
+  value: YOUR-CONTAINER-APP-NAME        # e.g., ca-eventagent
+# ============================================================
+
 - name: appPort
   value: '8080'
 
