@@ -84,9 +84,9 @@ stages:
                   PAYLOAD_INPUT="$AGENT_PAYLOAD"
                 fi
 
-                # Copilot Studio Queue a new build sends values in Build.Parameters.
-                if [ -n "${BUILD_PARAMETERS_RAW:-}" ]; then
-                  PARAM_AGENT_PAYLOAD="$(python3 -c 'import json,os; raw=os.environ.get("BUILD_PARAMETERS_RAW", "").strip(); first=json.loads(raw) if raw and (raw.startswith("{") or raw.startswith("\"{")) else {}; data=json.loads(first) if isinstance(first, str) and first.strip().startswith("{") else first; v=data.get("agentPayload", "") if isinstance(data, dict) else ""; print(v if isinstance(v, str) else json.dumps(v))' 2>/dev/null || true)"
+                # Queue a new build sends payload in Build.Parameters (exposed as BUILD_PARAMETERS env var).
+                if [ -n "${BUILD_PARAMETERS:-}" ]; then
+                  PARAM_AGENT_PAYLOAD="$(python3 -c 'import json,os; raw=os.environ.get("BUILD_PARAMETERS", "").strip(); first=json.loads(raw) if raw and (raw.startswith("{") or raw.startswith("\"{")) else {}; data=json.loads(first) if isinstance(first, str) and first.strip().startswith("{") else first; v=data.get("agentPayload", "") if isinstance(data, dict) else ""; print(v if isinstance(v, str) else json.dumps(v))' 2>/dev/null || true)"
 
                   if [ -n "${PARAM_AGENT_PAYLOAD:-}" ]; then
                     PAYLOAD_INPUT="$PARAM_AGENT_PAYLOAD"
@@ -114,4 +114,3 @@ stages:
             env:
               QUEUE_AGENT_PAYLOAD: $(queueAgentPayload)
               AGENT_PAYLOAD: $(agentPayload)
-              BUILD_PARAMETERS_RAW: $(Build.Parameters)
