@@ -11,6 +11,8 @@ variables:
   value: ubuntu-latest
 - name: queueAgentPayload
   value: ''
+- name: agentPayload
+  value: ''
 - name: imageRepository
   value: agentops-webhook
 - name: dockerfilePath
@@ -78,6 +80,10 @@ stages:
                   PAYLOAD_INPUT="$QUEUE_AGENT_PAYLOAD"
                 fi
 
+                if [ -n "${AGENT_PAYLOAD:-}" ]; then
+                  PAYLOAD_INPUT="$AGENT_PAYLOAD"
+                fi
+
                 PAYLOAD_B64="$(printf '%s' "$PAYLOAD_INPUT" | base64 -w 0)"
                 EVENT_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
@@ -98,3 +104,4 @@ stages:
                   --query "[0].name" -o tsv
             env:
               QUEUE_AGENT_PAYLOAD: $(queueAgentPayload)
+              AGENT_PAYLOAD: $(agentPayload)
