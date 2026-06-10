@@ -1,102 +1,231 @@
 # Copilot Studio Agent Setup
 
-Este guia descreve como configurar o agente no Copilot Studio para acionar a pipeline do Azure DevOps e quais dados enviar no body da requisicao.
+This guide describes how to configure the Copilot Studio agent to trigger the Azure DevOps pipeline and pass the AI-generated executive report to the Container App.
 
-## Objetivo
+## Overview
 
-O agente deve coletar o contexto da conversa, montar um payload JSON e chamar a pipeline `AgentOps-ContainerApp-CI` no Azure DevOps.
+The agent workflow:
 
-A pipeline criada neste projeto tem:
+1. **Collects event signals** (RSS feeds, news sources)
+2. **Analyzes with GPT model** to generate executive brief
+3. **Encodes as base64** using Power Fx `base64()` function
+4. **Triggers Azure DevOps pipeline** via "Queue a new build" action
+5. **Pipeline deploys** new Container App revision with payload
 
-- Nome: `AgentOps-ContainerApp-CI`
-- ID: `7`
-- Projeto Azure DevOps: `AgentOps`
-- Relative URI: `/AgentOps/_apis/pipelines/7/runs?api-version=7.1`
+## Pipeline Details
 
-## O que configurar no Copilot Studio
+| Property | Value |
+|----------|-------|
+| Name | `AgentOps-ContainerApp-CI` |
+| ID | `7` |
+| Project | `AgentOps` |
+| Organization | `ansiqueira0239` |
 
-Use a action `Send an HTTP request to Azure DevOps` com estes campos.
+## Copilot Studio Configuration
 
-### Connection
+### Action: Queue a new build
 
-- Organization Name: `ansiqueira0239`
+Use the **Azure DevOps** connector's "Queue a new build" action.
 
-### Parameters
+#### Connection Settings
 
-- Method: `POST`
-- Relative URI: `/AgentOps/_apis/pipelines/7/runs?api-version=7.1`
+- **Organization Name**: `ansiqueira0239`
 
-### Headers
+#### Action Parameters
 
-- `Content-Type`: `application/json`
+| Parameter | Value |
+|-----------|-------|
+| Project Name | `AgentOps` |
+| Definition Id | `7` |
+| Source Branch | `refs/heads/main` |
 
-## Body da requisicao
+### Parameters Expression (Critical)
 
-O Azure DevOps espera o body no formato abaixo porque a pipeline usa `templateParameters.agentPayload`.
+In the **Parameters** field, use this expression:
+
+```
+{"agentPayload": "@{base64(body('Agent')?['result'])}"}
+```
+
+Or in the expression editor:
+
+```
+concat('{"agentPayload": "', base64(body('Agent')?['result']), '"}')
+```
+
+**Important**: The `base64()` function encodes the JSON payload. The pipeline passes it directly without re-encoding.
+
+## Agent Output Format
+
+The agent should output a structured `executive_brief` JSON:
 
 ```json
 {
-  "templateParameters": {
-    "agentPayload": "{\"source\":\"copilot-studio\",\"conversationId\":\"...\",\"userId\":\"...\",\"message\":\"...\",\"action\":\"refresh\"}"
-  }
+  "event_name": "Build 2026",
+  "executive_brief": {
+    "top_5_stories": [
+      {
+        "title": "AI-Powered Development",
+        "why_it_matters": "Transforms developer productivity",
+        "implication": "20% faster development cycles"
+      }
+    ],
+    "stories_by_solution_area": [
+      {
+        "solution_area": "Azure AI",
+        "key_message": "New Foundry capabilities announced",
+        "notable_signals": "3 major announcements"
+      }
+    ],
+    "actions": {
+      "SIs": ["Upskill on Azure AI Foundry"],
+      "SDC_ISVs": ["Integrate Copilot SDK"]
+    },
+    "priority_notes": [
+      "Security updates require immediate attention"
+    ]
+  },
+  "normalized_signals": {
+    "items": [
+      {
+        "id": "SIG001",
+        "title": "Signal Title",
+        "summary": "Brief description",
+        "product_area": "Azure",
+        "source": "TechCrunch",
+        "source_ref": "article-url"
+      }
+    ]
+  },
+  "timestampUtc": "2026-06-10T15:30:00Z"
 }
 ```
 
-Observacao importante:
+## Agent Instructions
 
-- `agentPayload` precisa ser uma string JSON escapada.
-- A pipeline recebe essa string, converte em base64 e grava em `COPILOT_AGENT_PAYLOAD_B64` no Container App.
+Configure the agent with these system instructions:
 
-## Campos recomendados para enviar
+```
+You are an Event Intelligence Agent that analyzes technology event signals and produces executive briefs for Microsoft partners.
 
-Estes sao os campos mais uteis para a integracao inicial.
+Your output MUST be a valid JSON object with this structure:
+- event_name: Name of the event being analyzed
+- executive_brief: Object containing:
+  - top_5_stories: Array of the most important stories
+  - stories_by_solution_area: Array grouped by Azure solution area
+  - actions: Object with SIs and SDC_ISVs recommendation arrays
+  - priority_notes: Array of urgent observations
+- normalized_signals: Object with items array of source signals
+- timestampUtc: ISO timestamp
 
-```json
-{
-  "source": "copilot-studio",
-  "conversationId": "string",
-  "userId": "string",
-  "message": "string",
-  "action": "refresh",
-  "timestampUtc": "2026-06-09T21:00:00Z"
-}
+Focus on:
+1. Business impact and partner opportunities
+2. Actionable insights for System Integrators
+3. ISV partnership and SDK integration opportunities
+4. Security and compliance considerations
+
+Output ONLY the JSON object, no markdown or explanations.
 ```
 
-Descricao sugerida:
+## Troubleshooting
 
-- `source`: identifica a origem do evento
-- `conversationId`: correlacao da conversa
-- `userId`: usuario que acionou o agente
-- `message`: ultima mensagem do usuario
-- `action`: operacao desejada no deploy ou atualizacao
-- `timestampUtc`: horario do envio
+### "Parameters value is not valid JSON"
 
-## Instrucoes do agente
+Ensure the expression produces valid JSON. Test with:
 
-Use estas instrucoes no agente do Copilot Studio.
-
-```text
-Voce e um agente operacional responsavel por disparar atualizacoes no Azure DevOps para o projeto AgentOps.
-
-Quando o usuario pedir para publicar, atualizar, sincronizar, redeployar ou refrescar o ambiente, voce deve:
-1. Identificar a intencao operacional.
-2. Coletar o contexto minimo da solicitacao.
-3. Montar um payload JSON com source, conversationId, userId, message, action e timestampUtc.
-4. Chamar a action do Azure DevOps que executa a pipeline AgentOps-ContainerApp-CI.
-5. Confirmar ao usuario que a solicitacao foi enviada.
-
-Regras:
-- Nunca invente valores tecnicos se o usuario nao informou; use o contexto da conversa.
-- Use action=refresh como padrao quando o usuario pedir atualizacao generica.
-- Se faltar contexto critico, pergunte antes de chamar a pipeline.
-- Seja objetivo ao informar sucesso ou falha.
+```
+{"agentPayload": "dGVzdA=="}
 ```
 
-## Configuracao recomendada da action
+### Empty payload at Container App
 
-Nome sugerido da action no Copilot Studio:
+1. Check the agent node outputs a `result` property
+2. Verify `body('Agent')?['result']` returns the JSON
+3. Confirm `base64()` is applied correctly
 
-- `Run AgentOps Azure DevOps Pipeline`
+### Pipeline shows empty PAYLOAD_INPUT
+
+The pipeline reads from `BUILD_PARAMETERS` environment variable. Ensure:
+- Queue action uses `Parameters` field (not `Variables`)
+- JSON format is `{"agentPayload": "base64string"}`
+
+## Flow Diagram
+
+```
+┌─────────────────┐
+│  Event Signals  │
+│  (RSS, News)    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Copilot Studio │
+│     Agent       │
+│  (GPT53Chat)    │
+└────────┬────────┘
+         │ executive_brief JSON
+         ▼
+┌─────────────────┐
+│   base64()      │
+│   encoding      │
+└────────┬────────┘
+         │ "eyJldmVudF9uYW1lIjo..."
+         ▼
+┌─────────────────┐
+│ Queue a new     │
+│ build action    │
+│ Parameters:     │
+│ {"agentPayload":│
+│  "base64..."}   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Azure DevOps    │
+│ Pipeline        │
+│ BUILD_PARAMETERS│
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Container App   │
+│ COPILOT_AGENT_  │
+│ PAYLOAD_B64     │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ /report endpoint│
+│ Executive HTML  │
+└─────────────────┘
+```
+
+## Testing the Integration
+
+### 1. Test Agent Output
+
+In Copilot Studio test panel, verify the agent produces valid JSON.
+
+### 2. Test Pipeline Manually
+
+```bash
+# Encode a test payload
+PAYLOAD=$(echo '{"event_name":"Test"}' | base64)
+
+# Trigger pipeline
+curl -X POST "https://dev.azure.com/ansiqueira0239/AgentOps/_apis/pipelines/7/runs?api-version=7.1" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Basic $(echo -n ":$PAT" | base64)" \
+  -d "{\"templateParameters\":{\"agentPayload\":\"$PAYLOAD\"}}"
+```
+
+### 3. Verify Container App
+
+```bash
+curl https://ca-community-dashboard.wittysky-e03c5f2a.eastus2.azurecontainerapps.io/state
+```
+
+Check `revisionPayload.payload` contains the decoded JSON.
 
 Descricao sugerida:
 
