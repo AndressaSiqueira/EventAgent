@@ -44,6 +44,41 @@ function renderReport({ title, body, timestamp, buildId }) {
     }
 
     /* ── Header ── */
+    .topbar {
+      background: #1a1a2e;
+      padding: 12px 0;
+    }
+    .topbar-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.3px;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-icon svg { width: 20px; height: 20px; fill: #fff; }
+    .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .logo-text .brand { font-size: 16px; }
+    .logo-text .sub { font-size: 11px; font-weight: 400; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
+
     .header {
       background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
       color: #fff;
@@ -247,6 +282,20 @@ function renderReport({ title, body, timestamp, buildId }) {
 </head>
 <body>
 
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        </div>
+        <div class="logo-text">
+          <span class="brand">EPS Reports</span>
+          <span class="sub">Events</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <header class="header">
     <div class="header-inner">
       <div class="header-badge">
@@ -279,7 +328,7 @@ function renderReport({ title, body, timestamp, buildId }) {
 
   <footer class="footer">
     <span>Gerado automaticamente pelo Copilot Studio Agent</span>
-    <span>AgentOps · <a href="/state">API JSON</a> · <a href="/health">Health</a></span>
+    <span>EPS Reports - Events · <a href="/state">API JSON</a> · <a href="/health">Health</a></span>
   </footer>
 
 </body>
