@@ -86,7 +86,7 @@ stages:
 
                 # Queue a new build sends payload in Build.Parameters (exposed as BUILD_PARAMETERS env var).
                 if [ -n "${BUILD_PARAMETERS:-}" ]; then
-                  PARAM_AGENT_PAYLOAD="$(python3 -c 'import json,os; raw=os.environ.get("BUILD_PARAMETERS", "").strip(); first=json.loads(raw) if raw and (raw.startswith("{") or raw.startswith("\"{")) else {}; data=json.loads(first) if isinstance(first, str) and first.strip().startswith("{") else first; v=data.get("agentPayload", "") if isinstance(data, dict) else ""; print(v if isinstance(v, str) else json.dumps(v))' 2>/dev/null || true)"
+                  PARAM_AGENT_PAYLOAD="$(python3 -c 'import json,os; raw=os.environ.get("BUILD_PARAMETERS", "").strip(); first=json.loads(raw) if raw and (raw.startswith("{") or raw.startswith("\"{}")) else {}; data=json.loads(first) if isinstance(first, str) and first.strip().startswith("{") else first; v=data.get("agentPayload", "") if isinstance(data, dict) else ""; print(v if isinstance(v, str) else "")' 2>/dev/null || true)"
 
                   if [ -n "${PARAM_AGENT_PAYLOAD:-}" ]; then
                     PAYLOAD_INPUT="$PARAM_AGENT_PAYLOAD"
@@ -98,14 +98,20 @@ stages:
                   BUILD_URL="${SYSTEM_COLLECTIONURI}${SYSTEM_TEAMPROJECT}/_apis/build/builds/${BUILD_BUILDID}?api-version=7.1"
                   BUILD_JSON="$(curl -sS -H "Authorization: Bearer ${SYSTEM_ACCESSTOKEN}" "$BUILD_URL" || true)"
                   RAW_PARAMS="$(python3 -c 'import json,sys; d=json.load(sys.stdin) if sys.stdin.readable() else {}; print(d.get("parameters", ""))' <<< "$BUILD_JSON" 2>/dev/null || true)"
-                  PARAM_AGENT_PAYLOAD="$(RAW_PARAMS="$RAW_PARAMS" python3 -c 'import json,os; raw=os.environ.get("RAW_PARAMS", "").strip(); first=json.loads(raw) if raw and (raw.startswith("{") or raw.startswith("\"{")) else {}; data=json.loads(first) if isinstance(first, str) and first.strip().startswith("{") else first; v=data.get("agentPayload", "") if isinstance(data, dict) else ""; print(v if isinstance(v, str) else json.dumps(v))' 2>/dev/null || true)"
+                  PARAM_AGENT_PAYLOAD="$(RAW_PARAMS="$RAW_PARAMS" python3 -c 'import json,os; raw=os.environ.get("RAW_PARAMS", "").strip(); first=json.loads(raw) if raw and (raw.startswith("{") or raw.startswith("\"{}")) else {}; data=json.loads(first) if isinstance(first, str) and first.strip().startswith("{") else first; v=data.get("agentPayload", "") if isinstance(data, dict) else ""; print(v if isinstance(v, str) else "")' 2>/dev/null || true)"
 
                   if [ -n "${PARAM_AGENT_PAYLOAD:-}" ]; then
                     PAYLOAD_INPUT="$PARAM_AGENT_PAYLOAD"
                   fi
                 fi
 
-                PAYLOAD_B64="$(printf '%s' "$PAYLOAD_INPUT" | base64 -w 0)"
+                # If payload is already base64 (from Copilot Studio base64() function), use directly.
+                # Otherwise encode plain text to base64.
+                if echo "$PAYLOAD_INPUT" | base64 -d 2>/dev/null | python3 -c 'import sys,json; json.load(sys.stdin)' 2>/dev/null; then
+                  PAYLOAD_B64="$PAYLOAD_INPUT"
+                else
+                  PAYLOAD_B64="$(printf '%s' "$PAYLOAD_INPUT" | base64 -w 0)"
+                fi
                 EVENT_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
                 az containerapp ingress update \
