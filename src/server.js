@@ -96,12 +96,12 @@ function convertExecutiveBriefToMarkdown(payload) {
 }
 
 /**
- * Extract report data from payload (supports both formats).
+ * Extract report data from payload (supports multiple formats).
  */
 function extractReportData(payload) {
-  if (!payload) return { title: null, bodyMd: null };
+  if (!payload) return { title: null, bodyMd: null, timestamp: null };
 
-  // New format: executive_brief structure
+  // Format 1: executive_brief structured JSON
   if (payload.executive_brief) {
     return {
       title: payload.event_name || "Executive Report",
@@ -110,12 +110,44 @@ function extractReportData(payload) {
     };
   }
 
-  // Old format: reportBody markdown
-  return {
-    title: payload.reportTitle || null,
-    bodyMd: payload.reportBody || null,
-    timestamp: payload.timestampUtc || null,
-  };
+  // Format 2: reportBody markdown (legacy)
+  if (payload.reportBody) {
+    return {
+      title: payload.reportTitle || "Executive Report",
+      bodyMd: payload.reportBody,
+      timestamp: payload.timestampUtc || null,
+    };
+  }
+
+  // Format 3: raw text/markdown (fallback when JSON parse failed)
+  if (payload.raw) {
+    // Decode base64 if it looks like base64
+    let content = payload.raw;
+    try {
+      const decoded = Buffer.from(payload.raw, "base64").toString("utf-8");
+      // Check if it looks like text (not binary)
+      if (/^[\x20-\x7E\r\n\t]+$/.test(decoded.substring(0, 100)) || decoded.includes("**") || decoded.includes("##")) {
+        content = decoded;
+      }
+    } catch {
+      // Keep original content
+    }
+
+    // Try to extract a title from the markdown
+    let title = "Executive Report";
+    const titleMatch = content.match(/^#\s+(.+)$/m) || content.match(/\*\*(.+?)\*\*/);
+    if (titleMatch) {
+      title = titleMatch[1].substring(0, 100);
+    }
+
+    return {
+      title: title,
+      bodyMd: content,
+      timestamp: null,
+    };
+  }
+
+  return { title: null, bodyMd: null, timestamp: null };
 }
 
 let lastEvent = {
