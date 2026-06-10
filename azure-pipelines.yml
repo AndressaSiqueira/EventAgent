@@ -84,6 +84,33 @@ stages:
                   PAYLOAD_INPUT="$AGENT_PAYLOAD"
                 fi
 
+                # Copilot Studio Queue a new build sends values in Build.Parameters.
+                if [ -n "${BUILD_PARAMETERS_RAW:-}" ]; then
+                  PARAM_AGENT_PAYLOAD="$(python3 - <<'PY'
+import json
+import os
+
+raw = os.environ.get("BUILD_PARAMETERS_RAW", "").strip()
+if not raw:
+    print("")
+else:
+    try:
+        data = json.loads(raw)
+        value = data.get("agentPayload", "")
+        if isinstance(value, str):
+            print(value)
+        else:
+            print(json.dumps(value))
+    except Exception:
+        print("")
+PY
+)"
+
+                  if [ -n "${PARAM_AGENT_PAYLOAD:-}" ]; then
+                    PAYLOAD_INPUT="$PARAM_AGENT_PAYLOAD"
+                  fi
+                fi
+
                 PAYLOAD_B64="$(printf '%s' "$PAYLOAD_INPUT" | base64 -w 0)"
                 EVENT_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
@@ -105,3 +132,4 @@ stages:
             env:
               QUEUE_AGENT_PAYLOAD: $(queueAgentPayload)
               AGENT_PAYLOAD: $(agentPayload)
+              BUILD_PARAMETERS_RAW: $(Build.Parameters)
