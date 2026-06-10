@@ -28,6 +28,8 @@ variables:
   value: rg-community-dashboard
 - name: containerAppName
   value: ca-community-dashboard
+- name: appPort
+  value: '8080'
 
 stages:
 - stage: Build
@@ -79,11 +81,16 @@ stages:
                 PAYLOAD_B64="$(printf '%s' "$PAYLOAD_INPUT" | base64 -w 0)"
                 EVENT_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
+                az containerapp ingress update \
+                  --name "$(containerAppName)" \
+                  --resource-group "$(resourceGroup)" \
+                  --target-port "$(appPort)"
+
                 az containerapp update \
                   --name "$(containerAppName)" \
                   --resource-group "$(resourceGroup)" \
                   --image "$IMAGE" \
-                  --set-env-vars COPILOT_AGENT_PAYLOAD_B64="$PAYLOAD_B64" COPILOT_EVENT_TIMESTAMP="$EVENT_TIME" BUILD_BUILDID="$(Build.BuildId)"
+                  --set-env-vars COPILOT_AGENT_PAYLOAD_B64="$PAYLOAD_B64" COPILOT_EVENT_TIMESTAMP="$EVENT_TIME" BUILD_BUILDID="$(Build.BuildId)" PORT="$(appPort)"
 
                 az containerapp revision list \
                   --name "$(containerAppName)" \
