@@ -1,4 +1,8 @@
 const express = require("express");
+const { marked } = require("marked");
+const { renderReport } = require("./report-template");
+
+marked.setOptions({ gfm: true, breaks: false });
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -27,6 +31,20 @@ let lastEvent = {
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
 });
+
+app.get("/report", (_req, res) => {
+  const payload = lastEvent.payload || {};
+  const bodyMd = payload.reportBody || null;
+  const html = renderReport({
+    title: payload.reportTitle || "Relatório Executivo",
+    body: bodyMd ? marked.parse(bodyMd) : null,
+    timestamp: payload.timestampUtc || null,
+    buildId: process.env.BUILD_BUILDID || null,
+  });
+  res.status(200).type("html").send(html);
+});
+
+app.get("/", (_req, res) => res.redirect("/report"));
 
 app.get("/state", (_req, res) => {
   res.status(200).json({
