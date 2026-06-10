@@ -23,11 +23,11 @@ variables:
 - name: azureSubscriptionServiceConnection
   value: AgentOps-AzureRM-SC
 - name: acrLoginServer
-  value: youracr.azurecr.io
+  value: crcommunitydashansi.azurecr.io
 - name: resourceGroup
-  value: rg-agentops
+  value: rg-community-dashboard
 - name: containerAppName
-  value: ca-agentops-webhook
+  value: ca-community-dashboard
 
 stages:
 - stage: Build
