@@ -89,18 +89,20 @@ function convertExecutiveBriefToMarkdown(payload) {
   if (brief.actions) {
     md += "## Recommended Actions\n\n";
     if (brief.actions.SIs && brief.actions.SIs.length > 0) {
+      md += `<div class="partner-content si-content">\n\n`;
       md += "### For System Integrators (SIs)\n\n";
       brief.actions.SIs.forEach((action) => {
         md += `- ${action}\n`;
       });
-      md += "\n";
+      md += `\n</div>\n\n`;
     }
     if (brief.actions.SDC_ISVs && brief.actions.SDC_ISVs.length > 0) {
+      md += `<div class="partner-content isv-content">\n\n`;
       md += "### For ISVs & SDC Partners\n\n";
       brief.actions.SDC_ISVs.forEach((action) => {
         md += `- ${action}\n`;
       });
-      md += "\n";
+      md += `\n</div>\n\n`;
     }
   }
 
