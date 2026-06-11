@@ -54,6 +54,21 @@ function convertExecutiveBriefToMarkdown(payload) {
   const eventName = payload.event_name || "Event Report";
   let md = "";
 
+  // Build signal ID to title map for lookups
+  const signalMap = {};
+  if (payload.normalized_signals && payload.normalized_signals.items) {
+    payload.normalized_signals.items.forEach(sig => {
+      signalMap[sig.id.toUpperCase()] = sig.title;
+    });
+  }
+
+  // How to read this report
+  md += `## How to Read This Report\n\n`;
+  md += `This report is structured around a set of key **Signals** identified from ${eventName} sessions and discussions.\n\n`;
+  md += `Each Signal represents a recurring pattern or emerging trend observed across multiple sessions, highlighting where technology, developer behavior, and platform direction are converging.\n\n`;
+  md += `For each Signal, we provide a concise summary, why it matters, and the potential impact on partners and customers.\n\n`;
+  md += `---\n\n`;
+
   // Top 5 Stories
   if (brief.top_5_stories && brief.top_5_stories.length > 0) {
     md += "## Top Stories\n\n";
@@ -77,10 +92,13 @@ function convertExecutiveBriefToMarkdown(payload) {
           signals = signals.split(/[,\s]+/).filter(Boolean);
         }
         const signalLinks = signals.map(sig => {
-          const id = String(sig).trim();
-          return `[${id}](#signal-${id.toLowerCase()})`;
-        }).join(", ");
-        md += `**Signals:** ${signalLinks}\n\n`;
+          const id = String(sig).trim().toUpperCase();
+          const title = signalMap[id] || id;
+          // Truncate long titles
+          const shortTitle = title.length > 60 ? title.substring(0, 57) + '...' : title;
+          return `[${shortTitle}](#signal-${id.toLowerCase()})`;
+        }).join(" · ");
+        md += `**Related Signals:** ${signalLinks}\n\n`;
       }
     });
   }
@@ -90,7 +108,7 @@ function convertExecutiveBriefToMarkdown(payload) {
     md += "## Recommended Actions\n\n";
     if (brief.actions.SIs && brief.actions.SIs.length > 0) {
       md += `<div class="partner-content si-content">\n\n`;
-      md += "### For System Integrators (SIs)\n\n";
+      md += "### For Systems Integrators (SI)\n\n";
       brief.actions.SIs.forEach((action) => {
         md += `- ${action}\n`;
       });
@@ -98,20 +116,12 @@ function convertExecutiveBriefToMarkdown(payload) {
     }
     if (brief.actions.SDC_ISVs && brief.actions.SDC_ISVs.length > 0) {
       md += `<div class="partner-content isv-content">\n\n`;
-      md += "### For ISVs & SDC Partners\n\n";
+      md += "### For SDC / ISV\n\n";
       brief.actions.SDC_ISVs.forEach((action) => {
         md += `- ${action}\n`;
       });
       md += `\n</div>\n\n`;
     }
-  }
-
-  // Priority Notes
-  if (brief.priority_notes && brief.priority_notes.length > 0) {
-    md += "## Priority Notes\n\n";
-    brief.priority_notes.forEach((note) => {
-      md += `> ${note}\n\n`;
-    });
   }
 
   // Normalized Signals Summary
