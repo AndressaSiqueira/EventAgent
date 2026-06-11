@@ -67,13 +67,18 @@ function convertExecutiveBriefToMarkdown(payload) {
   // Stories by Solution Area
   if (brief.stories_by_solution_area && brief.stories_by_solution_area.length > 0) {
     md += "## Stories by Solution Area\n\n";
-    md += "| Solution Area | Key Message | Signals |\n";
-    md += "|---|---|---|\n";
     brief.stories_by_solution_area.forEach((area) => {
-      const msg = area.key_message.replace(/\|/g, "\\|").substring(0, 200) + (area.key_message.length > 200 ? "..." : "");
-      md += `| **${area.solution_area}** | ${msg} | ${area.notable_signals || ""} |\n`;
+      md += `### ${area.solution_area}\n\n`;
+      md += `${area.key_message}\n\n`;
+      if (area.notable_signals) {
+        // Convert signal IDs to anchor links (e.g., "S05,S09" -> "[S05](#signal-s05), [S09](#signal-s09)")
+        const signalLinks = area.notable_signals.split(/[,\s]+/).filter(Boolean).map(sig => {
+          const id = sig.trim();
+          return `[${id}](#signal-${id.toLowerCase()})`;
+        }).join(", ");
+        md += `**Signals:** ${signalLinks}\n\n`;
+      }
     });
-    md += "\n";
   }
 
   // Actions
@@ -107,9 +112,17 @@ function convertExecutiveBriefToMarkdown(payload) {
   if (payload.normalized_signals && payload.normalized_signals.items) {
     md += "## Signal Details\n\n";
     payload.normalized_signals.items.forEach((signal) => {
-      md += `**${signal.id}: ${signal.title}** (${signal.product_area})\n`;
-      md += `${signal.summary}\n`;
-      md += `_Source: ${signal.source} — ${signal.source_ref}_\n\n`;
+      // Add anchor for signal links
+      md += `<a id="signal-${signal.id.toLowerCase()}"></a>\n\n`;
+      md += `### ${signal.id}: ${signal.title}\n\n`;
+      md += `**Product Area:** ${signal.product_area}\n\n`;
+      md += `${signal.summary}\n\n`;
+      if (signal.source_ref && signal.source_ref.startsWith('http')) {
+        md += `🔗 [Watch Session](${signal.source_ref})\n\n`;
+      } else {
+        md += `_Source: ${signal.source} — ${signal.source_ref}_\n\n`;
+      }
+      md += "---\n\n";
     });
   }
 
