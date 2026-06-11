@@ -61,7 +61,7 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
        HERO HEADER
     ════════════════════════════════════════════════════════════════════════════ */
     .hero {
-      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 60%, #3b82f6 100%);
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #3b82f6 100%);
       position: relative;
       overflow: hidden;
       padding: 0 0 60px;
@@ -69,12 +69,11 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     .hero::before {
       content: '';
       position: absolute;
-      top: 0;
-      right: 0;
       bottom: 0;
-      width: 60%;
-      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'%3E%3Cpath fill='%23ffffff' fill-opacity='0.08' d='M0,200 C150,350 350,50 500,150 C650,250 700,50 800,100 L800,400 L0,400 Z'/%3E%3Cpath fill='%23ffffff' fill-opacity='0.05' d='M0,250 C200,350 300,150 500,200 C700,250 750,100 800,150 L800,400 L0,400 Z'/%3E%3C/svg%3E") no-repeat right bottom;
-      background-size: cover;
+      left: 0;
+      right: 0;
+      height: 120px;
+      background: linear-gradient(to top, rgba(241,245,249,0.1), transparent);
     }
     .hero-inner {
       max-width: 1200px;
@@ -110,26 +109,27 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     
     /* Filter in header */
     .filter-group {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.12);
       backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 16px 20px;
-      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 20px 24px;
+      border: 1px solid rgba(255,255,255,0.18);
+      min-width: 320px;
     }
     .filter-label {
       font-size: 11px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.7);
+      font-weight: 700;
+      color: rgba(255,255,255,0.8);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      text-align: center;
     }
     .filter-buttons {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     .filter-btn {
       display: inline-flex;
@@ -782,10 +782,7 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
         </div>
         
         <div class="filter-group">
-          <div class="filter-label">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-            Filter by Audience
-          </div>
+          <div class="filter-label">Filter by Audience</div>
           <div class="filter-buttons">
             <button class="filter-btn active" data-filter="all" onclick="filterPartner('all')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
