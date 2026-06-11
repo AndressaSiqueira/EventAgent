@@ -1,0 +1,26 @@
+# ESMetadata inventory configuration
+# Prevents repository from being deactivated
+
+schemaVersion: 1.0.0
+
+providers:
+  - provider: InventoryAsCode
+    version: 1.0.0
+    metadata:
+      # Classification - non-production demo/sample repository
+      isProduction: false
+
+      # Inheritance - apply to all subfolders
+      includeSubfolders: true
+
+      # Ownership - direct owners (non-production repos only)
+      accountableOwners:
+        directOwners:
+          - ansiqueira@microsoft.com
+          - v-ansiqueira@microsoft.com
+
+      # Routing - ADO area path for work item routing
+      routing:
+        defaultAreaPath:
+          org: ansiqueira0239
+          path: AgentOps
