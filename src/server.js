@@ -71,9 +71,13 @@ function convertExecutiveBriefToMarkdown(payload) {
       md += `### ${area.solution_area}\n\n`;
       md += `${area.key_message}\n\n`;
       if (area.notable_signals) {
-        // Convert signal IDs to anchor links (e.g., "S05,S09" -> "[S05](#signal-s05), [S09](#signal-s09)")
-        const signalLinks = area.notable_signals.split(/[,\s]+/).filter(Boolean).map(sig => {
-          const id = sig.trim();
+        // Handle both array and comma-separated string formats
+        let signals = area.notable_signals;
+        if (typeof signals === 'string') {
+          signals = signals.split(/[,\s]+/).filter(Boolean);
+        }
+        const signalLinks = signals.map(sig => {
+          const id = String(sig).trim();
           return `[${id}](#signal-${id.toLowerCase()})`;
         }).join(", ");
         md += `**Signals:** ${signalLinks}\n\n`;
