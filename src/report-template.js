@@ -309,10 +309,238 @@ function renderReport({ title, body, timestamp, buildId }) {
     .report-card.filter-si .isv-content { display: none; }
     .report-card.filter-isv .si-content { display: none; }
 
+    /* ── Progress Bar ── */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      z-index: 9999;
+      transition: width 0.1s;
+    }
+
+    /* ── Table of Contents ── */
+    .toc {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 32px;
+    }
+    .toc-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toc-title svg { width: 16px; height: 16px; }
+    .toc-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .toc-list a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .toc-list a:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+      transform: translateY(-1px);
+    }
+    .toc-list a svg { width: 14px; height: 14px; opacity: 0.6; }
+
+    /* ── Collapsible Sections ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 16px 0;
+      border-bottom: 2px solid var(--brand-light);
+      margin: 40px 0 14px;
+      user-select: none;
+    }
+    .section-header:hover { opacity: 0.8; }
+    .section-header h2 {
+      margin: 0 !important;
+      padding: 0 !important;
+      border: none !important;
+    }
+    .section-toggle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--brand-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s;
+    }
+    .section-toggle svg { width: 16px; height: 16px; color: var(--brand); }
+    .section-content {
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    .section-content.collapsed {
+      max-height: 0 !important;
+    }
+    .section-header.collapsed .section-toggle {
+      transform: rotate(-90deg);
+    }
+
+    /* ── Back to Top ── */
+    .back-to-top {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 48px;
+      height: 48px;
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,120,212,0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .back-to-top:hover {
+      background: var(--brand-dark);
+      transform: translateY(-2px);
+    }
+    .back-to-top svg { width: 24px; height: 24px; }
+
+    /* ── Story Cards ── */
+    .story-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .story-card:hover {
+      border-color: var(--brand);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .story-card h3 {
+      margin: 0 0 8px 0 !important;
+      font-size: 16px !important;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .story-card h3 .num {
+      background: var(--brand);
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .story-card .preview {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .story-card .details {
+      display: none;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .story-card.expanded .preview { display: none; }
+    .story-card.expanded .details { display: block; }
+    .story-card .expand-hint {
+      color: var(--brand);
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .story-card.expanded .expand-hint { display: none; }
+
+    /* ── Signal Badge ── */
+    .signal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--brand-light);
+      color: var(--brand-dark);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Reading Stats ── */
+    .reading-stats {
+      display: flex;
+      gap: 20px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 12px;
+    }
+    .reading-stats span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.7;
+    }
+
     @media (max-width: 640px) {
       .report-card { padding: 28px 24px; }
       .header-inner { padding: 0 20px; }
       .content-wrap { padding: 0 16px; }
+      .back-to-top { bottom: 20px; right: 20px; width: 44px; height: 44px; }
+      .toc-list { flex-direction: column; }
+      .toc-list a { width: 100%; justify-content: center; }
     }
   </style>
 </head>
@@ -378,25 +606,94 @@ function renderReport({ title, body, timestamp, buildId }) {
     }
   </main>
 
+  <!-- Progress Bar -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+  </button>
+
   <footer class="footer">
     <span>Automatically generated by Copilot Studio Agent</span>
     <span>EPS Reports - Events · <a href="/state">API JSON</a> · <a href="/health">Health</a></span>
   </footer>
 
   <script>
+  // Partner filter
   function filterPartner(type) {
     const card = document.getElementById('reportCard');
     if (!card) return;
     const buttons = document.querySelectorAll('.filter-btn');
-    
-    buttons.forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.filter === type);
-    });
-    
+    buttons.forEach(btn => btn.classList.toggle('active', btn.dataset.filter === type));
     card.classList.remove('filter-si', 'filter-isv');
     if (type === 'si') card.classList.add('filter-si');
     if (type === 'isv') card.classList.add('filter-isv');
   }
+
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const winScroll = document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    document.getElementById('progressBar').style.width = scrolled + '%';
+    
+    // Back to top visibility
+    const btn = document.getElementById('backToTop');
+    if (winScroll > 300) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  });
+
+  // Collapsible sections
+  document.querySelectorAll('.section-header').forEach(header => {
+    header.addEventListener('click', () => {
+      header.classList.toggle('collapsed');
+      const content = header.nextElementSibling;
+      if (content && content.classList.contains('section-content')) {
+        content.classList.toggle('collapsed');
+        if (!content.classList.contains('collapsed')) {
+          content.style.maxHeight = content.scrollHeight + 'px';
+        }
+      }
+    });
+  });
+
+  // Initialize section heights
+  document.querySelectorAll('.section-content').forEach(content => {
+    if (!content.classList.contains('collapsed')) {
+      content.style.maxHeight = content.scrollHeight + 'px';
+    }
+  });
+
+  // Story card expand
+  document.querySelectorAll('.story-card').forEach(card => {
+    card.addEventListener('click', () => card.classList.toggle('expanded'));
+  });
+
+  // Smooth scroll for anchor links (expand section if collapsed)
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href');
+      const target = document.querySelector(targetId);
+      if (target) {
+        // If target is inside a collapsed section, expand it
+        const section = target.closest('.section-content');
+        if (section && section.classList.contains('collapsed')) {
+          const header = section.previousElementSibling;
+          if (header && header.classList.contains('section-header')) {
+            header.classList.remove('collapsed');
+            section.classList.remove('collapsed');
+            section.style.maxHeight = section.scrollHeight + 'px';
+          }
+        }
+        // Small delay to allow section to expand
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    });
+  });
   </script>
 
 </body>
