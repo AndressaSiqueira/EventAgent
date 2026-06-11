@@ -10,6 +10,25 @@ app.use(express.json({ limit: "1mb" }));
 const port = process.env.PORT || 8080;
 const sharedSecret = process.env.AGENT_SHARED_SECRET || "";
 
+/**
+ * Extract JSON from markdown code blocks if present.
+ * Handles: ```json ... ```, ``` ... ```, or plain JSON
+ */
+function extractJsonFromMarkdown(text) {
+  if (!text) return text;
+  
+  // Remove leading/trailing whitespace
+  let content = text.trim();
+  
+  // Check for ```json or ``` code block wrapper
+  const codeBlockMatch = content.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?```\s*$/);
+  if (codeBlockMatch) {
+    content = codeBlockMatch[1].trim();
+  }
+  
+  return content;
+}
+
 function decodePayload(payloadB64) {
   if (!payloadB64) {
     return null;
@@ -17,7 +36,9 @@ function decodePayload(payloadB64) {
 
   try {
     const decoded = Buffer.from(payloadB64, "base64").toString("utf-8");
-    return JSON.parse(decoded);
+    // Try to extract JSON from markdown code blocks
+    const jsonContent = extractJsonFromMarkdown(decoded);
+    return JSON.parse(jsonContent);
   } catch {
     return { raw: payloadB64 };
   }
