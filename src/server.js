@@ -45,14 +45,14 @@ function decodePayload(payloadB64) {
 }
 
 /**
- * Convert structured executive_brief payload into markdown.
+ * Convert structured executive_brief payload into HTML content.
  */
 function convertExecutiveBriefToMarkdown(payload) {
   if (!payload || !payload.executive_brief) return null;
 
   const brief = payload.executive_brief;
   const eventName = payload.event_name || "Event Report";
-  let md = "";
+  let html = "";
 
   // Build signal ID to title map for lookups
   const signalMap = {};
@@ -62,171 +62,182 @@ function convertExecutiveBriefToMarkdown(payload) {
     });
   }
 
-  // Count sections for reading stats
-  const storyCount = brief.top_5_stories?.length || 0;
-  const areaCount = brief.stories_by_solution_area?.length || 0;
-  const signalCount = payload.normalized_signals?.items?.length || 0;
-
-  // Table of Contents (HTML)
-  md += `<nav class="toc">
-<div class="toc-title">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-Quick Navigation
-</div>
-<ul class="toc-list">
-<li><a href="#section-intro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> How to Read</a></li>
-${storyCount > 0 ? '<li><a href="#section-stories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Top Stories</a></li>' : ''}
-${areaCount > 0 ? '<li><a href="#section-areas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Solution Areas</a></li>' : ''}
-<li><a href="#section-actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> Actions</a></li>
-${signalCount > 0 ? '<li><a href="#section-signals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2M20 12h2M12 2v2M12 20v2M6.93 6.93l1.41 1.41M15.66 15.66l1.41 1.41M6.93 17.07l1.41-1.41M15.66 8.34l1.41-1.41"/><circle cx="12" cy="12" r="4"/></svg> Signal Details</a></li>' : ''}
-</ul>
-</nav>
-
-`;
-
-  // How to read this report (collapsible)
-  md += `<section id="section-intro">
-<div class="section-header">
-<h2>How to Read This Report</h2>
-<span class="section-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></span>
-</div>
-<div class="section-content">
-
-`;
-  md += `This report is structured around a set of key **Signals** identified from ${eventName} sessions and discussions.\n\n`;
-  md += `Each Signal represents a recurring pattern or emerging trend observed across multiple sessions, highlighting where technology, developer behavior, and platform direction are converging.\n\n`;
-  md += `For each Signal, we provide a concise summary, why it matters, and the potential impact on partners and customers.\n\n`;
-  md += `📊 **Report contains:** ${storyCount} Top Stories · ${areaCount} Solution Areas · ${signalCount} Signals\n\n`;
-  md += `</div></section>\n\n`;
-
-  // Top 5 Stories (as clickable cards)
+  // Top Stories Section
   if (brief.top_5_stories && brief.top_5_stories.length > 0) {
-    md += `<section id="section-stories">
-<div class="section-header">
-<h2>Top Stories</h2>
-<span class="section-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></span>
-</div>
-<div class="section-content">
-
+    html += `<section id="section-stories">
+<h2>
+  <span class="section-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+  </span>
+  Top Stories
+</h2>
+<div class="story-grid">
 `;
     brief.top_5_stories.forEach((story, i) => {
-      md += `<div class="story-card">
-<h3><span class="num">${i + 1}</span> ${story.title}</h3>
-<div class="preview">${story.why_it_matters}</div>
-<div class="details">
-<p><strong>Why it matters:</strong> ${story.why_it_matters}</p>
-<p><strong>Implication:</strong> ${story.implication}</p>
+      html += `<div class="story-card">
+  <div class="story-card-header">
+    <span class="story-num">${i + 1}</span>
+    <h4>${escapeHtml(story.title)}</h4>
+  </div>
+  <p class="why"><strong>Why it matters:</strong> ${escapeHtml(story.why_it_matters)}</p>
+  <p><strong>Implication:</strong> ${escapeHtml(story.implication)}</p>
 </div>
-<div class="expand-hint">Click to expand ↓</div>
-</div>
-
 `;
     });
-    md += `</div></section>\n\n`;
+    html += `</div>
+</section>
+`;
   }
 
-  // Stories by Solution Area (collapsible)
+  // Solution Areas Section
   if (brief.stories_by_solution_area && brief.stories_by_solution_area.length > 0) {
-    md += `<section id="section-areas">
-<div class="section-header">
-<h2>Stories by Solution Area</h2>
-<span class="section-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></span>
-</div>
-<div class="section-content">
-
+    html += `<section id="section-areas">
+<h2>
+  <span class="section-icon" style="background: linear-gradient(135deg, #a78bfa, #7c3aed);">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+  </span>
+  Stories by Solution Area
+</h2>
 `;
     brief.stories_by_solution_area.forEach((area) => {
-      md += `### ${area.solution_area}\n\n`;
-      md += `${area.key_message}\n\n`;
+      html += `<h3>${escapeHtml(area.solution_area)}</h3>
+<p>${escapeHtml(area.key_message)}</p>
+`;
       if (area.notable_signals) {
-        // Handle both array and comma-separated string formats
         let signals = area.notable_signals;
         if (typeof signals === 'string') {
           signals = signals.split(/[,\s]+/).filter(Boolean);
         }
-        const signalLinks = signals.map(sig => {
+        html += `<p>`;
+        signals.forEach(sig => {
           const id = String(sig).trim().toUpperCase();
           const title = signalMap[id] || id;
-          // Truncate long titles
-          const shortTitle = title.length > 60 ? title.substring(0, 57) + '...' : title;
-          return `<a href="#signal-${id.toLowerCase()}" class="signal-badge">${shortTitle}</a>`;
-        }).join(" ");
-        md += `${signalLinks}\n\n`;
+          const shortTitle = title.length > 50 ? title.substring(0, 47) + '...' : title;
+          html += `<a href="#signal-${id.toLowerCase()}" class="signal-badge">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="4"/></svg>
+  ${escapeHtml(shortTitle)}
+</a> `;
+        });
+        html += `</p>
+`;
       }
     });
-    md += `</div></section>\n\n`;
+    html += `</section>
+`;
   }
 
-  // Actions (collapsible)
+  // Actions Section
   if (brief.actions) {
-    md += `<section id="section-actions">
-<div class="section-header">
-<h2>Recommended Actions</h2>
-<span class="section-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></span>
-</div>
-<div class="section-content">
-
+    html += `<section id="section-actions">
+<h2>
+  <span class="section-icon" style="background: linear-gradient(135deg, #60a5fa, #3b82f6);">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+  </span>
+  Recommended Actions
+</h2>
 `;
     if (brief.actions.SIs && brief.actions.SIs.length > 0) {
-      md += `<div class="partner-content si-content">\n\n`;
-      md += "### For Systems Integrators (SI)\n\n";
+      html += `<div class="partner-section si si-content">
+  <h4>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    For Systems Integrators (SI)
+  </h4>
+  <ul>
+`;
       brief.actions.SIs.forEach((action) => {
-        md += `- ${action}\n`;
+        html += `    <li>${escapeHtml(action)}</li>
+`;
       });
-      md += `\n</div>\n\n`;
+      html += `  </ul>
+</div>
+`;
     }
     if (brief.actions.SDC_ISVs && brief.actions.SDC_ISVs.length > 0) {
-      md += `<div class="partner-content isv-content">\n\n`;
-      md += "### For SDC / ISV\n\n";
+      html += `<div class="partner-section isv isv-content">
+  <h4>
+    <svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+    For SDC / ISV
+  </h4>
+  <ul>
+`;
       brief.actions.SDC_ISVs.forEach((action) => {
-        md += `- ${action}\n`;
+        html += `    <li>${escapeHtml(action)}</li>
+`;
       });
-      md += `\n</div>\n\n`;
+      html += `  </ul>
+</div>
+`;
     }
-    md += `</div></section>\n\n`;
+    html += `</section>
+`;
   }
 
-  // Normalized Signals Summary (collapsible, starts collapsed for long content)
+  // Signal Details Section
   if (payload.normalized_signals && payload.normalized_signals.items) {
-    md += `<section id="section-signals">
-<div class="section-header collapsed">
-<h2>Signal Details (${payload.normalized_signals.items.length})</h2>
-<span class="section-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></span>
-</div>
-<div class="section-content collapsed">
-
+    html += `<section id="section-signals">
+<h2>
+  <span class="section-icon" style="background: linear-gradient(135deg, #2dd4bf, #14b8a6);">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2M20 12h2M12 2v2M12 20v2M6.93 6.93l1.41 1.41M15.66 15.66l1.41 1.41M6.93 17.07l1.41-1.41M15.66 8.34l1.41-1.41"/><circle cx="12" cy="12" r="4"/></svg>
+  </span>
+  Signal Details (${payload.normalized_signals.items.length})
+</h2>
 `;
     payload.normalized_signals.items.forEach((signal) => {
-      // Add anchor for signal links
-      md += `<a id="signal-${signal.id.toLowerCase()}"></a>\n\n`;
-      md += `### ${signal.id}: ${signal.title}\n\n`;
-      md += `**Product Area:** ${signal.product_area}\n\n`;
-      md += `${signal.summary}\n\n`;
+      html += `<div class="signal-detail" id="signal-${signal.id.toLowerCase()}">
+  <div class="signal-detail-header">
+    <span class="signal-id">${escapeHtml(signal.id)}</span>
+    <h4>${escapeHtml(signal.title)}</h4>
+  </div>
+  <div class="signal-meta">
+    <span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      ${escapeHtml(signal.product_area)}
+    </span>
+`;
       if (signal.source_ref && signal.source_ref.startsWith('http')) {
-        md += `🔗 [Watch Session](${signal.source_ref})\n\n`;
-      } else {
-        md += `_Source: ${signal.source} — ${signal.source_ref}_\n\n`;
+        html += `    <span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      <a href="${escapeHtml(signal.source_ref)}" target="_blank">Watch Session</a>
+    </span>
+`;
       }
-      md += "---\n\n";
+      html += `  </div>
+  <p>${escapeHtml(signal.summary)}</p>
+</div>
+`;
     });
-    md += `</div></section>\n\n`;
+    html += `</section>
+`;
   }
 
-  return md || null;
+  return html || null;
+}
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 /**
  * Extract report data from payload (supports multiple formats).
  */
 function extractReportData(payload) {
-  if (!payload) return { title: null, bodyMd: null, timestamp: null };
+  if (!payload) return { title: null, bodyHtml: null, timestamp: null, storyCount: 0, areaCount: 0, signalCount: 0, eventName: null };
 
   // Format 1: executive_brief structured JSON
   if (payload.executive_brief) {
+    const brief = payload.executive_brief;
     return {
       title: payload.event_name || "Executive Report",
-      bodyMd: convertExecutiveBriefToMarkdown(payload),
+      bodyHtml: convertExecutiveBriefToMarkdown(payload),
       timestamp: payload.timestampUtc || null,
+      storyCount: brief.top_5_stories?.length || 0,
+      areaCount: brief.stories_by_solution_area?.length || 0,
+      signalCount: payload.normalized_signals?.items?.length || 0,
+      eventName: payload.event_name || null,
     };
   }
 
@@ -234,8 +245,12 @@ function extractReportData(payload) {
   if (payload.reportBody) {
     return {
       title: payload.reportTitle || "Executive Report",
-      bodyMd: payload.reportBody,
+      bodyHtml: marked.parse(payload.reportBody),
       timestamp: payload.timestampUtc || null,
+      storyCount: 0,
+      areaCount: 0,
+      signalCount: 0,
+      eventName: null,
     };
   }
 
@@ -262,12 +277,16 @@ function extractReportData(payload) {
 
     return {
       title: title,
-      bodyMd: content,
+      bodyHtml: marked.parse(content),
       timestamp: null,
+      storyCount: 0,
+      areaCount: 0,
+      signalCount: 0,
+      eventName: null,
     };
   }
 
-  return { title: null, bodyMd: null, timestamp: null };
+  return { title: null, bodyHtml: null, timestamp: null, storyCount: 0, areaCount: 0, signalCount: 0, eventName: null };
 }
 
 let lastEvent = {
@@ -281,12 +300,16 @@ app.get("/health", (_req, res) => {
 
 app.get("/report", (_req, res) => {
   const payload = lastEvent.payload || {};
-  const { title, bodyMd, timestamp } = extractReportData(payload);
+  const { title, bodyHtml, timestamp, storyCount, areaCount, signalCount, eventName } = extractReportData(payload);
   const html = renderReport({
     title: title || "Executive Report",
-    body: bodyMd ? marked.parse(bodyMd) : null,
+    body: bodyHtml,
     timestamp: timestamp || null,
     buildId: process.env.BUILD_BUILDID || null,
+    storyCount,
+    areaCount,
+    signalCount,
+    eventName,
   });
   res.status(200).type("html").send(html);
 });
