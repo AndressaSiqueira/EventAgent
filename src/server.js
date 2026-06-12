@@ -56,32 +56,43 @@ function convertExecutiveBriefToMarkdown(payload) {
 
   // Build signal ID to title map for lookups
   const signalMap = {};
+  const signalSourceMap = {};
   if (payload.normalized_signals && payload.normalized_signals.items) {
     payload.normalized_signals.items.forEach(sig => {
       signalMap[sig.id.toUpperCase()] = sig.title;
+      signalSourceMap[sig.id.toUpperCase()] = sig;
     });
   }
 
-  // Top Stories Section
+  // Back button HTML
+  const backBtn = `<button class="section-back" onclick="goBack()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+  Back to Overview
+</button>`;
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TOP STORIES - FULL WIDTH VERTICAL LIST
+  // ═══════════════════════════════════════════════════════════════════════════
   if (brief.top_5_stories && brief.top_5_stories.length > 0) {
     html += `<section id="section-stories">
+${backBtn}
 <h2>
   <span class="section-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
   </span>
-  Top Stories
+  Top ${brief.top_5_stories.length} Stories
 </h2>
-<div class="story-grid">
+<div class="story-list">
 `;
     brief.top_5_stories.forEach((story, i) => {
-      html += `<div class="story-card">
-  <div class="story-card-header">
+      html += `  <div class="story-item">
     <span class="story-num">${i + 1}</span>
-    <h4>${escapeHtml(story.title)}</h4>
+    <div class="story-content">
+      <h4>${escapeHtml(story.title)}</h4>
+      <p><strong>Why it matters:</strong> ${escapeHtml(story.why_it_matters)}</p>
+      <p><strong>Implication:</strong> ${escapeHtml(story.implication)}</p>
+    </div>
   </div>
-  <p class="why"><strong>Why it matters:</strong> ${escapeHtml(story.why_it_matters)}</p>
-  <p><strong>Implication:</strong> ${escapeHtml(story.implication)}</p>
-</div>
 `;
     });
     html += `</div>
@@ -89,46 +100,62 @@ function convertExecutiveBriefToMarkdown(payload) {
 `;
   }
 
-  // Solution Areas Section
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SOLUTION AREAS - TILE GRID (2-3 columns, handles odd numbers)
+  // ═══════════════════════════════════════════════════════════════════════════
   if (brief.stories_by_solution_area && brief.stories_by_solution_area.length > 0) {
     html += `<section id="section-areas">
+${backBtn}
 <h2>
   <span class="section-icon" style="background: linear-gradient(135deg, #a78bfa, #7c3aed);">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
   </span>
-  Stories by Solution Area
+  Stories by Solution Area (${brief.stories_by_solution_area.length})
 </h2>
+<div class="area-grid">
 `;
     brief.stories_by_solution_area.forEach((area) => {
-      html += `<h3>${escapeHtml(area.solution_area)}</h3>
-<p>${escapeHtml(area.key_message)}</p>
+      html += `  <div class="area-tile">
+    <h4>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      ${escapeHtml(area.solution_area)}
+    </h4>
+    <p>${escapeHtml(area.key_message)}</p>
 `;
       if (area.notable_signals) {
         let signals = area.notable_signals;
         if (typeof signals === 'string') {
           signals = signals.split(/[,\s]+/).filter(Boolean);
         }
-        html += `<p>`;
+        html += `    <div class="area-signals">
+`;
         signals.forEach(sig => {
           const id = String(sig).trim().toUpperCase();
           const title = signalMap[id] || id;
-          const shortTitle = title.length > 50 ? title.substring(0, 47) + '...' : title;
-          html += `<a href="#signal-${id.toLowerCase()}" class="signal-badge">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="4"/></svg>
-  ${escapeHtml(shortTitle)}
-</a> `;
+          const shortTitle = title.length > 30 ? title.substring(0, 27) + '...' : title;
+          html += `      <a href="javascript:void(0)" onclick="showSection('section-signals'); setTimeout(() => document.getElementById('signal-${id.toLowerCase()}').scrollIntoView({behavior:'smooth'}), 100);" class="signal-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/></svg>
+        ${escapeHtml(shortTitle)}
+      </a>
+`;
         });
-        html += `</p>
+        html += `    </div>
 `;
       }
+      html += `  </div>
+`;
     });
-    html += `</section>
+    html += `</div>
+</section>
 `;
   }
 
-  // Actions Section
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ACTIONS
+  // ═══════════════════════════════════════════════════════════════════════════
   if (brief.actions) {
     html += `<section id="section-actions">
+${backBtn}
 <h2>
   <span class="section-icon" style="background: linear-gradient(135deg, #60a5fa, #3b82f6);">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
@@ -172,9 +199,12 @@ function convertExecutiveBriefToMarkdown(payload) {
 `;
   }
 
-  // Signal Details Section
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SIGNAL DETAILS - WITH SOURCE LINKS (blog, docs, video)
+  // ═══════════════════════════════════════════════════════════════════════════
   if (payload.normalized_signals && payload.normalized_signals.items) {
     html += `<section id="section-signals">
+${backBtn}
 <h2>
   <span class="section-icon" style="background: linear-gradient(135deg, #2dd4bf, #14b8a6);">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2M20 12h2M12 2v2M12 20v2M6.93 6.93l1.41 1.41M15.66 15.66l1.41 1.41M6.93 17.07l1.41-1.41M15.66 8.34l1.41-1.41"/><circle cx="12" cy="12" r="4"/></svg>
@@ -193,17 +223,53 @@ function convertExecutiveBriefToMarkdown(payload) {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
       ${escapeHtml(signal.product_area)}
     </span>
+  </div>
+  <p>${escapeHtml(signal.summary)}</p>
 `;
-      if (signal.source_ref && signal.source_ref.startsWith('http')) {
-        html += `    <span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-      <a href="${escapeHtml(signal.source_ref)}" target="_blank">Watch Session</a>
-    </span>
+      // Source links section
+      const hasLinks = signal.source_ref || signal.blog_url || signal.docs_url || signal.video_url || signal.learn_more_url;
+      if (hasLinks) {
+        html += `  <div class="source-links">
+`;
+        if (signal.source_ref && signal.source_ref.startsWith('http')) {
+          html += `    <a href="${escapeHtml(signal.source_ref)}" target="_blank" class="source-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      Watch Session
+    </a>
+`;
+        }
+        if (signal.blog_url && signal.blog_url.startsWith('http')) {
+          html += `    <a href="${escapeHtml(signal.blog_url)}" target="_blank" class="source-link blog">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      Read Blog
+    </a>
+`;
+        }
+        if (signal.docs_url && signal.docs_url.startsWith('http')) {
+          html += `    <a href="${escapeHtml(signal.docs_url)}" target="_blank" class="source-link docs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+      View Docs
+    </a>
+`;
+        }
+        if (signal.video_url && signal.video_url.startsWith('http')) {
+          html += `    <a href="${escapeHtml(signal.video_url)}" target="_blank" class="source-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+      Watch Video
+    </a>
+`;
+        }
+        if (signal.learn_more_url && signal.learn_more_url.startsWith('http')) {
+          html += `    <a href="${escapeHtml(signal.learn_more_url)}" target="_blank" class="source-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      Learn More
+    </a>
+`;
+        }
+        html += `  </div>
 `;
       }
-      html += `  </div>
-  <p>${escapeHtml(signal.summary)}</p>
-</div>
+      html += `</div>
 `;
     });
     html += `</section>

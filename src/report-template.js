@@ -185,14 +185,15 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     .hero-meta svg { width: 16px; height: 16px; opacity: 0.7; }
 
     /* ════════════════════════════════════════════════════════════════════════════
-       QUICK NAV (Jump to)
+       QUICK NAV (Jump to) - STICKY
     ════════════════════════════════════════════════════════════════════════════ */
     .quick-nav {
       max-width: 1200px;
       margin: -30px auto 0;
       padding: 0 32px;
-      position: relative;
-      z-index: 20;
+      position: sticky;
+      top: 8px;
+      z-index: 100;
     }
     .quick-nav-inner {
       background: var(--surface);
@@ -201,7 +202,7 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
       padding: 16px 28px;
       display: flex;
       flex-wrap: wrap;
-      gap: 8px 28px;
+      gap: 8px 20px;
       align-items: center;
     }
     .quick-nav-label {
@@ -216,12 +217,18 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
       font-weight: 600;
       color: var(--brand);
       text-decoration: none;
-      padding: 6px 0;
-      border-bottom: 2px solid transparent;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--brand-light);
       transition: all 0.2s;
     }
     .quick-nav a:hover {
-      border-bottom-color: var(--brand);
+      background: var(--brand);
+      color: #fff;
+    }
+    .quick-nav a.active {
+      background: var(--brand);
+      color: #fff;
     }
 
     /* ════════════════════════════════════════════════════════════════════════════
@@ -229,7 +236,7 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     ════════════════════════════════════════════════════════════════════════════ */
     .overview-section {
       max-width: 1200px;
-      margin: 32px auto;
+      margin: 48px auto 32px;
       padding: 0 32px;
     }
     .overview-grid {
@@ -275,120 +282,7 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     }
 
     /* ════════════════════════════════════════════════════════════════════════════
-       EXPLORE SECTION
-    ════════════════════════════════════════════════════════════════════════════ */
-    .explore-section {
-      max-width: 1200px;
-      margin: 48px auto;
-      padding: 0 32px;
-    }
-    .section-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 20px;
-    }
-    .explore-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-    .explore-card {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
-      padding: 28px;
-      cursor: pointer;
-      transition: all 0.25s;
-      border: 2px solid transparent;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
-    .explore-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--brand);
-    }
-    .explore-card-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-    .explore-card-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .explore-card-icon.gold { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
-    .explore-card-icon.teal { background: linear-gradient(135deg, #2dd4bf, #14b8a6); }
-    .explore-card-icon.blue { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
-    .explore-card-icon.purple { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
-    .explore-card-icon svg { width: 28px; height: 28px; color: #fff; }
-    .explore-card-info { flex: 1; }
-    .explore-card-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .explore-badge {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 10px;
-      text-transform: uppercase;
-    }
-    .explore-badge.executive { background: var(--brand-light); color: var(--brand); }
-    .explore-badge.deep { background: var(--accent-light); color: var(--accent); }
-    .explore-badge.action { background: var(--success-light); color: var(--success); }
-    .explore-card-desc {
-      font-size: 14px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 16px;
-    }
-    .explore-card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
-    }
-    .explore-card-time {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-    .explore-card-time svg { width: 16px; height: 16px; }
-    .explore-card-arrow {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--surface-alt);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-    .explore-card:hover .explore-card-arrow { background: var(--brand); }
-    .explore-card:hover .explore-card-arrow svg { color: #fff; }
-    .explore-card-arrow svg { width: 16px; height: 16px; color: var(--text-muted); }
-
-    /* ════════════════════════════════════════════════════════════════════════════
-       MAIN CONTENT
+       MAIN CONTENT - COLLAPSIBLE SECTIONS
     ════════════════════════════════════════════════════════════════════════════ */
     .main-content {
       max-width: 1200px;
@@ -402,28 +296,86 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
       padding: 48px;
     }
 
+    /* Collapsible sections */
+    .content-card section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .content-card section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Section intro message */
+    .section-intro {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .section-intro svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 20px;
+      opacity: 0.4;
+    }
+    .section-intro h3 {
+      font-size: 20px;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .section-intro p {
+      font-size: 15px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* Section back button */
+    .section-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 24px;
+    }
+    .section-back:hover {
+      background: var(--brand-light);
+      border-color: var(--brand);
+      color: var(--brand);
+    }
+    .section-back svg { width: 16px; height: 16px; }
+
     /* Typography */
     .content-card h2 {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 700;
       color: var(--text);
-      margin: 48px 0 20px;
-      padding-bottom: 12px;
+      margin: 0 0 24px;
+      padding-bottom: 16px;
       border-bottom: 2px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
-    .content-card h2:first-child { margin-top: 0; }
     .content-card h2 .section-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .content-card h2 .section-icon svg { width: 20px; height: 20px; color: #fff; }
+    .content-card h2 .section-icon svg { width: 24px; height: 24px; color: #fff; }
     .content-card h3 {
       font-size: 18px;
       font-weight: 700;
@@ -450,62 +402,113 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     .content-card li::marker { color: var(--brand); }
     .content-card a { color: var(--brand); text-decoration: none; }
     .content-card a:hover { text-decoration: underline; }
-    .content-card hr {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 32px 0;
-    }
 
-    /* Story cards */
-    .story-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
+    /* ════════════════════════════════════════════════════════════════════════════
+       TOP STORIES - FULL WIDTH VERTICAL LIST
+    ════════════════════════════════════════════════════════════════════════════ */
+    .story-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
       margin: 24px 0;
     }
-    .story-card {
+    .story-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 20px;
       background: var(--surface-alt);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 24px;
       transition: all 0.2s;
     }
-    .story-card:hover {
-      border-color: var(--brand);
+    .story-item:hover {
+      border-color: var(--gold);
       box-shadow: var(--shadow);
     }
-    .story-card-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
     .story-num {
-      width: 32px;
-      height: 32px;
+      width: 48px;
+      height: 48px;
       background: linear-gradient(135deg, #fbbf24, #f59e0b);
       color: #fff;
-      border-radius: 8px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 20px;
       font-weight: 700;
       flex-shrink: 0;
     }
-    .story-card h4 {
+    .story-content h4 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 12px 0 !important;
+      line-height: 1.4;
+    }
+    .story-content p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin: 0 0 8px 0;
+      line-height: 1.6;
+    }
+    .story-content p:last-child { margin-bottom: 0; }
+
+    /* ════════════════════════════════════════════════════════════════════════════
+       SOLUTION AREAS - TILE GRID (handles odd numbers)
+    ════════════════════════════════════════════════════════════════════════════ */
+    .area-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin: 24px 0;
+    }
+    /* For odd numbers - last item spans remaining space or centers */
+    .area-grid .area-tile:last-child:nth-child(3n+1) {
+      grid-column: 2; /* Center if alone in last row */
+    }
+    .area-grid .area-tile:last-child:nth-child(3n+2) {
+      grid-column: span 1; /* Normal if 2 items in last row */
+    }
+    .area-tile {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: all 0.2s;
+      border-top: 4px solid var(--accent);
+    }
+    .area-tile:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+    .area-tile h4 {
       font-size: 16px;
       font-weight: 700;
       color: var(--text);
-      margin: 0;
-      line-height: 1.4;
+      margin: 0 0 12px 0 !important;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .story-card p {
+    .area-tile h4 svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent);
+    }
+    .area-tile p {
       font-size: 14px;
       color: var(--text-muted);
-      margin: 0;
+      margin: 0 0 12px 0;
+      line-height: 1.6;
     }
-    .story-card .why { margin-bottom: 8px; }
+    .area-signals {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
 
     /* Signal badges */
     .signal-badge {
@@ -516,9 +519,8 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
       color: var(--teal);
       padding: 6px 12px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
-      margin: 4px 4px 4px 0;
       text-decoration: none;
       transition: all 0.2s;
     }
@@ -527,8 +529,11 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
       color: #fff;
       text-decoration: none;
     }
+    .signal-badge svg { width: 10px; height: 10px; }
 
-    /* Partner sections */
+    /* ════════════════════════════════════════════════════════════════════════════
+       ACTIONS - Partner sections
+    ════════════════════════════════════════════════════════════════════════════ */
     .partner-section {
       background: var(--surface-alt);
       border-radius: var(--radius);
@@ -549,12 +554,18 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     }
     .partner-section h4 svg { width: 20px; height: 20px; }
 
-    /* Signal details */
+    /* Filter content */
+    .filter-si .isv-content { display: none; }
+    .filter-isv .si-content { display: none; }
+
+    /* ════════════════════════════════════════════════════════════════════════════
+       SIGNAL DETAILS - WITH SOURCE LINKS
+    ════════════════════════════════════════════════════════════════════════════ */
     .signal-detail {
       background: var(--surface-alt);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 28px;
       margin: 20px 0;
     }
     .signal-detail-header {
@@ -566,36 +577,75 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     .signal-id {
       background: linear-gradient(135deg, #2dd4bf, #14b8a6);
       color: #fff;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 12px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
       font-weight: 700;
       white-space: nowrap;
     }
     .signal-detail h4 {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--text);
       margin: 0 !important;
+      line-height: 1.3;
     }
     .signal-meta {
       display: flex;
-      gap: 16px;
+      gap: 12px;
       margin-bottom: 16px;
       font-size: 13px;
       flex-wrap: wrap;
     }
     .signal-meta span {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
       color: var(--text-muted);
+      background: var(--surface);
+      padding: 6px 12px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
     }
-    .signal-meta svg { width: 16px; height: 16px; }
+    .signal-meta svg { width: 14px; height: 14px; }
+    .signal-meta a {
+      color: var(--brand);
+      text-decoration: none;
+    }
+    .signal-meta a:hover { text-decoration: underline; }
 
-    /* Filter content */
-    .filter-si .isv-content { display: none; }
-    .filter-isv .si-content { display: none; }
+    /* Source links */
+    .source-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--brand-light);
+      color: var(--brand);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .source-link:hover {
+      background: var(--brand);
+      color: #fff;
+      text-decoration: none;
+    }
+    .source-link.blog { background: var(--accent-light); color: var(--accent); }
+    .source-link.blog:hover { background: var(--accent); color: #fff; }
+    .source-link.docs { background: var(--success-light); color: var(--success); }
+    .source-link.docs:hover { background: var(--success); color: #fff; }
+    .source-link svg { width: 16px; height: 16px; }
 
     /* ════════════════════════════════════════════════════════════════════════════
        AI NOTICE
@@ -656,36 +706,39 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     .footer a:hover { text-decoration: underline; }
 
     /* ════════════════════════════════════════════════════════════════════════════
-       UTILITIES
+       BACK TO TOP - ENHANCED
     ════════════════════════════════════════════════════════════════════════════ */
     .back-to-top {
       position: fixed;
       bottom: 32px;
       right: 32px;
-      width: 52px;
-      height: 52px;
-      background: var(--brand);
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--brand), var(--accent));
       color: #fff;
       border: none;
-      border-radius: 50%;
+      border-radius: 16px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
       opacity: 0;
       visibility: hidden;
-      transform: translateY(20px);
-      transition: all 0.3s;
+      transform: translateY(20px) scale(0.9);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 1000;
     }
     .back-to-top.visible {
       opacity: 1;
       visibility: visible;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
-    .back-to-top:hover { background: var(--brand-dark); }
-    .back-to-top svg { width: 24px; height: 24px; }
+    .back-to-top:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 12px 32px rgba(37, 99, 235, 0.5);
+    }
+    .back-to-top svg { width: 28px; height: 28px; }
 
     .progress-bar {
       position: fixed;
@@ -714,18 +767,27 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     /* ════════════════════════════════════════════════════════════════════════════
        RESPONSIVE
     ════════════════════════════════════════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .area-grid { grid-template-columns: repeat(2, 1fr); }
+      .area-grid .area-tile:last-child:nth-child(odd) {
+        grid-column: span 2;
+      }
+    }
     @media (max-width: 900px) {
       .hero-content { grid-template-columns: 1fr; }
       .filter-group { margin-top: 24px; }
       .overview-grid { grid-template-columns: 1fr; }
-      .explore-grid { grid-template-columns: 1fr; }
-      .story-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
-      .hero-inner, .quick-nav, .overview-section, .explore-section, .main-content, .ai-notice { padding: 0 16px; }
+      .hero-inner, .quick-nav, .overview-section, .main-content, .ai-notice { padding: 0 16px; }
       .content-card { padding: 24px; }
       .filter-buttons { flex-wrap: wrap; }
       .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
+      .area-grid { grid-template-columns: 1fr; }
+      .area-grid .area-tile:last-child:nth-child(odd) { grid-column: span 1; }
+      .story-item { grid-template-columns: 1fr; text-align: center; }
+      .story-num { margin: 0 auto 12px; }
+      .quick-nav-inner { justify-content: center; }
     }
   </style>
 </head>
@@ -777,15 +839,15 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
 
   ${body ? `
   <!-- ══════════════════════════════════════════════════════════════════════════
-       QUICK NAV (Jump to)
+       QUICK NAV (Jump to) - STICKY
   ══════════════════════════════════════════════════════════════════════════ -->
-  <nav class="quick-nav">
+  <nav class="quick-nav" id="quickNav">
     <div class="quick-nav-inner">
       <span class="quick-nav-label">Jump to:</span>
-      <a href="#section-stories">Top Stories</a>
-      <a href="#section-areas">Solution Areas</a>
-      <a href="#section-signals">Signals</a>
-      <a href="#section-actions">Actions</a>
+      <a href="#section-stories" onclick="showSection('section-stories'); return false;">Top Stories</a>
+      <a href="#section-areas" onclick="showSection('section-areas'); return false;">Solution Areas</a>
+      <a href="#section-signals" onclick="showSection('section-signals'); return false;">Signals</a>
+      <a href="#section-actions" onclick="showSection('section-actions'); return false;">Actions</a>
     </div>
   </nav>
 
@@ -812,81 +874,16 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
   </section>
 
   <!-- ══════════════════════════════════════════════════════════════════════════
-       EXPLORE CARDS
-  ══════════════════════════════════════════════════════════════════════════ -->
-  <section class="explore-section">
-    <div class="section-label">Explore the Report</div>
-    <div class="explore-grid">
-      <a href="#section-stories" class="explore-card">
-        <div class="explore-card-header">
-          <div class="explore-card-icon gold">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <div class="explore-card-info">
-            <div class="explore-card-title">Top Stories <span class="explore-badge executive">Executive summary</span></div>
-          </div>
-        </div>
-        <p class="explore-card-desc">The most important announcements and highlights from ${escapeHtml(displayTitle)}.</p>
-        <div class="explore-card-footer">
-          <span class="explore-card-time">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            5 min read
-          </span>
-          <span class="explore-card-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
-        </div>
-      </a>
-      
-      <a href="#section-signals" class="explore-card">
-        <div class="explore-card-header">
-          <div class="explore-card-icon teal">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2M20 12h2M12 2v2M12 20v2M6.93 6.93l1.41 1.41M15.66 15.66l1.41 1.41M6.93 17.07l1.41-1.41M15.66 8.34l1.41-1.41"/><circle cx="12" cy="12" r="4"/></svg>
-          </div>
-          <div class="explore-card-info">
-            <div class="explore-card-title">Signals (S) <span class="explore-badge deep">Deep insights</span></div>
-          </div>
-        </div>
-        <p class="explore-card-desc">Key patterns across sessions, what they mean and why they matter.</p>
-        <div class="explore-card-footer">
-          <span class="explore-card-time">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            10+ min read
-          </span>
-          <span class="explore-card-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
-        </div>
-      </a>
-      
-      <a href="#section-actions" class="explore-card">
-        <div class="explore-card-header">
-          <div class="explore-card-icon blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-          </div>
-          <div class="explore-card-info">
-            <div class="explore-card-title">Actions <span class="explore-badge action">What to do</span></div>
-          </div>
-        </div>
-        <p class="explore-card-desc">Recommended actions and opportunities for partners.</p>
-        <div class="explore-card-footer">
-          <span class="explore-card-time">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            5 min read
-          </span>
-          <span class="explore-card-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </span>
-        </div>
-      </a>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════════════════════════════════════
-       MAIN CONTENT
+       MAIN CONTENT - COLLAPSIBLE SECTIONS
   ══════════════════════════════════════════════════════════════════════════ -->
   <section class="main-content" id="mainContent">
     <div class="content-card">
+      <!-- Intro message -->
+      <div class="section-intro" id="sectionIntro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
+        <h3>Select a section to explore</h3>
+        <p>Use the "Jump to" navigation above to view Top Stories, Solution Areas, Signals, or Actions.</p>
+      </div>
       ${body}
     </div>
   </section>
@@ -914,8 +911,8 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
   `}
 
   <!-- Back to Top -->
-  <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+  <button class="back-to-top" id="backToTop" onclick="scrollToTop()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
   </button>
 
   <!-- Footer -->
@@ -927,6 +924,52 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
   </footer>
 
   <script>
+  // Show section and hide intro
+  function showSection(sectionId) {
+    // Hide intro
+    const intro = document.getElementById('sectionIntro');
+    if (intro) intro.style.display = 'none';
+    
+    // Hide all sections
+    document.querySelectorAll('.content-card section').forEach(s => s.classList.remove('active'));
+    
+    // Show target section
+    const target = document.getElementById(sectionId);
+    if (target) {
+      target.classList.add('active');
+      // Scroll to section
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+    
+    // Update nav active state
+    document.querySelectorAll('.quick-nav a').forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + sectionId);
+    });
+  }
+  
+  // Go back to overview (show intro, hide sections)
+  function goBack() {
+    // Show intro
+    const intro = document.getElementById('sectionIntro');
+    if (intro) intro.style.display = 'block';
+    
+    // Hide all sections
+    document.querySelectorAll('.content-card section').forEach(s => s.classList.remove('active'));
+    
+    // Clear nav active state
+    document.querySelectorAll('.quick-nav a').forEach(a => a.classList.remove('active'));
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  // Scroll to top
+  function scrollToTop() {
+    goBack();
+  }
+
   // Filter
   function filterPartner(type) {
     const content = document.getElementById('mainContent');
@@ -944,16 +987,7 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
     const winScroll = document.documentElement.scrollTop;
     const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
     document.getElementById('progressBar').style.width = (winScroll / height) * 100 + '%';
-    document.getElementById('backToTop').classList.toggle('visible', winScroll > 300);
-  });
-
-  // Smooth scroll
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', function(e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    document.getElementById('backToTop').classList.toggle('visible', winScroll > 200);
   });
   </script>
 </body>
