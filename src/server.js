@@ -226,43 +226,22 @@ ${backBtn}
   </div>
   <p>${escapeHtml(signal.summary)}</p>
 `;
-      // Source links section
-      const hasLinks = signal.source_ref || signal.blog_url || signal.docs_url || signal.video_url || signal.learn_more_url;
+      // Source links section - session_url (Build sessions) and learn_more_url (other links)
+      const hasLinks = signal.session_url || signal.learn_more_url;
       if (hasLinks) {
         html += `  <div class="source-links">
 `;
-        if (signal.source_ref && signal.source_ref.startsWith('http')) {
-          html += `    <a href="${escapeHtml(signal.source_ref)}" target="_blank" class="source-link">
+        if (signal.session_url && signal.session_url.startsWith('http')) {
+          html += `    <a href="${escapeHtml(signal.session_url)}" target="_blank" class="source-link session">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
       Watch Session
     </a>
 `;
         }
-        if (signal.blog_url && signal.blog_url.startsWith('http')) {
-          html += `    <a href="${escapeHtml(signal.blog_url)}" target="_blank" class="source-link blog">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-      Read Blog
-    </a>
-`;
-        }
-        if (signal.docs_url && signal.docs_url.startsWith('http')) {
-          html += `    <a href="${escapeHtml(signal.docs_url)}" target="_blank" class="source-link docs">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
-      View Docs
-    </a>
-`;
-        }
-        if (signal.video_url && signal.video_url.startsWith('http')) {
-          html += `    <a href="${escapeHtml(signal.video_url)}" target="_blank" class="source-link">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-      Watch Video
-    </a>
-`;
-        }
         if (signal.learn_more_url && signal.learn_more_url.startsWith('http')) {
-          html += `    <a href="${escapeHtml(signal.learn_more_url)}" target="_blank" class="source-link">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      Learn More
+          html += `    <a href="${escapeHtml(signal.learn_more_url)}" target="_blank" class="source-link learn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Read More
     </a>
 `;
         }

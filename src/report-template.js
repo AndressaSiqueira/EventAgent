@@ -641,10 +641,10 @@ function renderReport({ title, body, timestamp, buildId, storyCount, areaCount, 
       color: #fff;
       text-decoration: none;
     }
-    .source-link.blog { background: var(--accent-light); color: var(--accent); }
-    .source-link.blog:hover { background: var(--accent); color: #fff; }
-    .source-link.docs { background: var(--success-light); color: var(--success); }
-    .source-link.docs:hover { background: var(--success); color: #fff; }
+    .source-link.session { background: var(--accent-light); color: var(--accent); }
+    .source-link.session:hover { background: var(--accent); color: #fff; }
+    .source-link.learn { background: var(--teal-light); color: var(--teal); }
+    .source-link.learn:hover { background: var(--teal); color: #fff; }
     .source-link svg { width: 16px; height: 16px; }
 
     /* ════════════════════════════════════════════════════════════════════════════
